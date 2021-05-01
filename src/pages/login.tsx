@@ -17,7 +17,9 @@ export default function Login() {
 
   const router = useRouter();
 
-  if (authenticated) router.push('/');
+  if (authenticated) {
+    router.push('/');
+  }
 
   const submitForm = async (event: FormEvent) => {
     event.preventDefault();
@@ -30,7 +32,7 @@ export default function Login() {
 
       dispatch('LOGIN', res.data );
 
-      router.push("/");
+      router.back();
     } catch (error) {
       setErrors(error.response.data);
     }

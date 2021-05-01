@@ -1,16 +1,26 @@
 import { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import Axios from "axios";
+import { SWRConfig } from "swr";
 
-import { AuthProvider } from '../context/auth';
+import { AuthProvider } from "../context/auth";
 
 import "../styles/tailwind.css";
-import '../styles/icons.css';
+import "../styles/icons.css";
 
 import NavBar from "../components/NavBar";
 
-Axios.defaults.baseURL = "http://localhost:5000/api";
+Axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL+ "/api";
 Axios.defaults.withCredentials = true;
+
+const fetcher = async (url: string) => { 
+  try {
+    const res = await Axios.get(url);
+    return res.data;    
+  } catch (error) {
+    throw error.response.data;
+  }
+}
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { pathname } = useRouter();
@@ -18,10 +28,19 @@ function MyApp({ Component, pageProps }: AppProps) {
   const authRoute = authRoutes.includes(pathname);
 
   return (
-    <AuthProvider>
-      {!authRoute && <NavBar />}
-      <Component {...pageProps} />
-    </AuthProvider>
+    <SWRConfig
+      value={{
+        fetcher,
+        dedupingInterval: 10000,
+      }}
+    >
+      <AuthProvider>
+        {!authRoute && <NavBar />}
+        <div className={authRoute ? "" : "pt-12"}>
+          <Component {...pageProps} />
+        </div>
+      </AuthProvider>
+    </SWRConfig>
   );
 }
 

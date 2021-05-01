@@ -1,23 +1,20 @@
 import Link from "next/link";
-import React, { Fragment } from "react";
+import React from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import classNames from "classnames";
-import { Post } from "../types";
 import Axios from "axios";
+
+import { Post } from "../types";
+import ActionButton from "./ActionButton";
+import { useAuthState } from "../context/auth";
+import { useRouter } from "next/router";
 
 dayjs.extend(relativeTime);
 
-const ActionButton = ({ children }) => {
-  return (
-    <div className="px-1 py-1 mr-1 text-xs text-gray-400 rounded cursor-pointer hover:bg-gray-200">
-      {children}
-    </div>
-  );
-};
-
 interface PostCardProps {
   post: Post;
+  revalidate?: Function;
 }
 
 export default function PostCard({
@@ -33,22 +30,46 @@ export default function PostCard({
     commentCount,
     url,
     username,
+    sub,
   },
+  revalidate,
 }: PostCardProps) {
-  const vote = async (value) => {
+  const { authenticated } = useAuthState();
+
+  const router = useRouter();
+
+  const isInSubPage = router.pathname === "/r/[sub]";
+
+  const vote = async (value: number) => {
+    if (!authenticated) {
+      router.push("/login");
+    }
+
+    if (value === userVote) {
+      value = 0;
+    }
+
     try {
-      const res = await Axios.post("/misc/vote", {
+      await Axios.post("/misc/vote", {
         identifier,
         slug,
         value,
       });
+
+      if (revalidate) {
+        revalidate();
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <div key={identifier} className="flex mb-4 bg-white rounded">
+    <div
+      key={identifier}
+      className="flex mb-4 bg-white rounded"
+      id={identifier}
+    >
       {/* Vote Section */}
       <div className="w-10 py-3 text-center bg-gray-200 rounded-l">
         {/* UpVote */}
@@ -81,19 +102,25 @@ export default function PostCard({
       {/* Data Section */}
       <div className="w-full p-2">
         <div className="flex items-center">
-          <Link href={`/r/${subName}`}>
-            <Fragment>
-              <img
-                src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-                className="w-6 h-6 mr-1 rounded-full cursor-pointer"
-              />
-              <a className="text-xs font-bold cursor-pointer hover:underline">
-                /r/{subName}
-              </a>
-            </Fragment>
-          </Link>
+          {!isInSubPage && (
+            <>
+              <Link href={`/r/${subName}`}>
+                <img
+                  src={sub.imageUrl}
+                  className="w-6 h-6 mr-1 rounded-full cursor-pointer"
+                />
+              </Link>
+
+              <Link href={`/r/${subName}`}>
+                <a className="text-xs font-bold cursor-pointer hover:underline">
+                  /r/{subName}
+                </a>
+              </Link>
+              <span className="mx-1 text-xs text-gray-500">•</span> by
+            </>
+          )}
+
           <p className="text-xs text-gray-500">
-            <span className="mx-1">•</span> by
             <Link href={`/u/${username}`}>
               <a className="mx-1 hover:underline">/u/{username}</a>
             </Link>

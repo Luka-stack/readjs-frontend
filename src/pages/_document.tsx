@@ -16,6 +16,13 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
+          <meta property="og:site_name" content="readjs" />
+          <meta property="og:type" content="website" />
+          <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/readjs-logo.svg`} />
+          <meta property="twitter:image" content={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/readjs-logo.svg`} />
+          <meta property="twitter:card" content="summary" />
+          {/* <meta property="twitter:site" content="@readjs" /> */}
+          <link rel="icon" type="image/svg+xml" href="/readjs-logo.svg" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
             href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600&display=swap"
@@ -27,6 +34,7 @@ class MyDocument extends Document {
             integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
             crossOrigin="anonymous"
           />
+          
         </Head>
         <body className="font-body" style={{ backgroundColor: "#DAE0E6" }}>
           <Main />
